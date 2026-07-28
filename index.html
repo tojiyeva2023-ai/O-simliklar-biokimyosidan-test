@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O‘simliklar biokimyosi testi</title>
+<style>
+:root {
+  --bg:#f4f7f6; --card:#ffffff; --primary:#176b4d; --primary2:#0f4e39;
+  --accent:#e6b325; --danger:#c62828; --muted:#667085; --line:#d9e2dd;
+  --ok:#1b8a5a; --shadow:0 10px 30px rgba(17,66,48,.10);
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--bg); color:#1f2937;
+}
+header {
+  position:sticky; top:0; z-index:20; background:#0f1720; color:white;
+  border-bottom:3px solid var(--accent); padding:12px 18px;
+}
+.header-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.brand { flex:1; min-width:250px; }
+.brand h1 { margin:0; font-size:20px; }
+.brand p { margin:4px 0 0; color:#cbd5e1; font-size:13px; }
+.timer-box {
+  display:flex; align-items:center; gap:10px; background:#1f2937;
+  padding:9px 14px; border-radius:10px; font-weight:700;
+}
+#timer { font-size:21px; letter-spacing:1px; }
+.top-btn {
+  border:1px solid #475569; color:white; background:#111827; padding:9px 13px;
+  border-radius:8px; cursor:pointer; font-weight:700;
+}
+.top-btn.danger { background:#be123c; border-color:#be123c; }
+.layout {
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,520px);
+  min-height:calc(100vh - 82px);
+}
+.left {
+  padding:28px 32px 105px; border-right:1px solid var(--line); background:#fff;
+}
+.right {
+  padding:24px 24px 110px; background:#f8faf9;
+}
+.section-kicker { color:#be123c; letter-spacing:2px; font-weight:800; font-size:13px; }
+.section-title { margin:8px 0 4px; font-size:29px; color:#12372a; }
+.section-sub { color:var(--muted); margin-bottom:20px; }
+.info-card {
+  background:linear-gradient(135deg,#eff8f3,#fffaf0); border:1px solid #dcebe3;
+  border-radius:14px; padding:18px 20px; box-shadow:var(--shadow); margin-bottom:18px;
+}
+.info-card h3 { margin:0 0 10px; color:var(--primary2); }
+.info-card p { line-height:1.65; margin:8px 0; }
+.rules { display:grid; gap:10px; margin-top:15px; }
+.rule { padding:11px 12px; border-left:4px solid var(--primary); background:#f5faf7; border-radius:6px; }
+.question-card {
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:18px; box-shadow:var(--shadow);
+}
+.q-meta { display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:13px; }
+.q-text { font-size:18px; line-height:1.45; font-weight:700; margin:14px 0 16px; }
+.options { display:grid; gap:10px; }
+.option {
+  display:flex; align-items:flex-start; gap:10px; padding:12px 13px; border:1px solid #cfd8d3;
+  border-radius:10px; cursor:pointer; background:white; transition:.18s;
+}
+.option:hover { border-color:var(--primary); background:#f4faf7; }
+.option.selected { border-color:var(--primary); background:#eaf7f0; box-shadow:inset 0 0 0 1px var(--primary); }
+.option input { margin-top:3px; }
+.actions { display:flex; justify-content:space-between; gap:10px; margin-top:18px; }
+.btn {
+  border:0; border-radius:9px; padding:11px 16px; cursor:pointer; font-weight:800;
+  background:var(--primary); color:white;
+}
+.btn.secondary { background:#e5e7eb; color:#111827; }
+.btn:disabled { opacity:.45; cursor:not-allowed; }
+.progress-wrap { margin-bottom:14px; }
+.progress-track { height:9px; background:#dfe8e3; border-radius:99px; overflow:hidden; }
+.progress-bar { height:100%; width:0; background:var(--primary); transition:.2s; }
+.progress-text { font-size:12px; color:var(--muted); margin-top:6px; }
+.bottom-nav {
+  position:fixed; left:0; right:0; bottom:0; z-index:30; background:#fff;
+  border-top:1px solid var(--line); padding:9px 14px;
+  box-shadow:0 -6px 18px rgba(0,0,0,.08);
+}
+.nav-row { display:flex; align-items:center; gap:10px; overflow-x:auto; }
+.section-tab {
+  flex:0 0 auto; border:1px solid #cfd8d3; background:#fff; padding:8px 12px;
+  border-radius:8px; cursor:pointer; font-weight:800;
+}
+.section-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.qnav { display:flex; gap:6px; }
+.qnum {
+  flex:0 0 34px; height:34px; border:1px solid #cfd8d3; background:#fff; border-radius:7px;
+  cursor:pointer; font-weight:700;
+}
+.qnum.current { border:2px solid #be123c; }
+.qnum.answered { background:#dff4e8; border-color:#66b88d; }
+.qnum.flagged::after { content:"•"; color:#be123c; margin-left:2px; }
+.flag-btn {
+  margin-left:auto; border:1px solid #d5dadd; background:#fff; padding:8px 10px;
+  border-radius:8px; cursor:pointer; white-space:nowrap;
+}
+.result {
+  background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px;
+  box-shadow:var(--shadow); text-align:center;
+}
+.score { font-size:54px; font-weight:900; color:var(--primary); margin:10px 0; }
+.result-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0; }
+.stat { background:#f6faf8; padding:14px 8px; border-radius:10px; }
+.hidden { display:none !important; }
+.small { font-size:13px; color:var(--muted); }
+@media (max-width:900px) {
+  .layout { grid-template-columns:1fr; }
+  .left { display:none; }
+  .right { padding:18px 14px 112px; }
+  .brand h1 { font-size:17px; }
+  .timer-box { order:3; }
+}
+@media (max-width:520px) {
+  header { padding:10px; }
+  .header-row { gap:8px; }
+  .brand { min-width:100%; }
+  .top-btn { padding:8px 10px; font-size:12px; }
+  .question-card { padding:14px; }
+  .q-text { font-size:16px; }
+  .result-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <h1>O‘SIMLIKLAR BIOKIMYOSI TESTI</h1>
+      <p>Termiz davlat universiteti · O‘qituvchi: Tojiyeva Feruza Anvarovna</p>
+    </div>
+    <div class="timer-box">⏱ <span id="timer">30:00</span></div>
+    <button class="top-btn" onclick="restartTest()">Qayta boshlash</button>
+    <button class="top-btn danger" onclick="finishTest()">Testni yakunlash</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="left">
+    <div class="section-kicker" id="leftKicker">BO‘LIM 1 / 2</div>
+    <h2 class="section-title" id="leftTitle">Fenolli birikmalar biokimyosi</h2>
+    <div class="section-sub" id="leftSub">1–15-savollar</div>
+
+    <div class="info-card">
+      <h3>Test haqida</h3>
+      <p>Ushbu test fenolli birikmalar, bir halqali fenollar, C₆—C₁ va C₆—C₃ strukturali birikmalar, kumarinlar biosintezi hamda kumarinlarga xos sifat reaksiyalari bo‘yicha tuzilgan.</p>
+      <div class="rules">
+        <div class="rule">Jami 30 ta savol. Har bir savolda 4 ta javob varianti mavjud.</div>
+        <div class="rule">Har bir to‘g‘ri javob 1 ball. Maksimal natija — 30 ball.</div>
+        <div class="rule">Test davomiyligi 30 daqiqa. Vaqt tugaganda test avtomatik yakunlanadi.</div>
+        <div class="rule">Savollar raqami orqali istalgan savolga o‘tish mumkin.</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3 id="topicTitle">1-bo‘lim mavzulari</h3>
+      <p id="topicText">Fenolli birikmalarning tuzilishi va biologik ahamiyati; monofenollar; polifenollar; fenol hosilalari; C₆ va C₆—C₁ strukturali birikmalar.</p>
+    </div>
+  </section>
+
+  <section class="right">
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-text" id="progressText">0 / 30 savolga javob berildi</div>
+    </div>
+
+    <div id="quizArea">
+      <div class="question-card">
+        <div class="q-meta">
+          <span id="qNumber">1-savol</span>
+          <span id="qLevel">Daraja: Oson</span>
+        </div>
+        <div class="q-text" id="qText"></div>
+        <div class="options" id="options"></div>
+        <div class="actions">
+          <button class="btn secondary" id="prevBtn" onclick="prevQuestion()">← Oldingi</button>
+          <button class="btn" id="nextBtn" onclick="nextQuestion()">Keyingi →</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="resultArea" class="result hidden">
+      <h2>Test yakunlandi</h2>
+      <div class="small">Sizning natijangiz</div>
+      <div class="score" id="scoreText">0/30</div>
+      <h3 id="percentText">0%</h3>
+      <div class="result-grid">
+        <div class="stat"><strong id="correctText">0</strong><br><span class="small">To‘g‘ri</span></div>
+        <div class="stat"><strong id="wrongText">0</strong><br><span class="small">Noto‘g‘ri</span></div>
+        <div class="stat"><strong id="blankText">0</strong><br><span class="small">Javobsiz</span></div>
+      </div>
+      <p id="resultMessage"></p>
+      <button class="btn" onclick="restartTest()">Testni qayta ishlash</button>
+    </div>
+  </section>
+</main>
+
+<div class="bottom-nav">
+  <div class="nav-row">
+    <button class="section-tab active" id="tab1" onclick="goSection(1)">1-bo‘lim</button>
+    <button class="section-tab" id="tab2" onclick="goSection(2)">2-bo‘lim</button>
+    <div class="qnav" id="qnav"></div>
+    <button class="flag-btn" id="flagBtn" onclick="toggleFlag()">⚑ Belgilash</button>
+  </div>
+</div>
+
+<script>
+const questions = [{"section": 1, "q": "Fenolli birikmalarga xos umumiy strukturaviy belgi qaysi?", "options": ["Aromatik halqaga birikkan bir yoki bir nechta gidroksil guruh", "Faqat alifatik zanjirdagi karboksil guruh", "Azot tutuvchi geterosiklik halqa", "Faqat fosfat guruhining mavjudligi"], "answer": 0, "level": "Oson"}, {"section": 1, "q": "Benzol halqasida ikkita yoki undan ortiq gidroksil guruh tutuvchi birikmalar qanday ataladi?", "options": ["Monosaxaridlar", "Polifenollar", "Alkaloidlar", "Terpenoidlar"], "answer": 1, "level": "Oson"}, {"section": 1, "q": "Fenolli birikmalar ilgari qanday mahsulot sifatida qaralgan?", "options": ["Fotosintezning boshlang‘ich mahsuloti", "Oqsil biosintezining oraliq mahsuloti", "Moddalar almashinuvining oxirgi, chiqindi mahsuloti", "Faqat zaxira uglevod"], "answer": 2, "level": "Oson"}, {"section": 1, "q": "Fenolli birikmalar nafas olish va fotosintez jarayonlarida asosan nimada ishtirok etadi?", "options": ["Vodorod atomining ko‘chirilishida", "DNK replikatsiyasida", "Aminokislotalarni parchalanishida", "Suvning osmotik yutilishida"], "answer": 0, "level": "O‘rta"}, {"section": 1, "q": "Polifenollarning fitonsidlik xususiyati o‘simlik uchun qanday ahamiyatga ega?", "options": ["Zamburug‘ va bakterial kasalliklarga chidamlilikni oshiradi", "Faqat meva hajmini kattalashtiradi", "Xlorofill sintezini butunlay to‘xtatadi", "Mineral tuzlarning yuvilishini tezlashtiradi"], "answer": 0, "level": "O‘rta"}, {"section": 1, "q": "Gul, meva, barg va poyalarning tabiiy rangi ko‘proq qaysi birikmalarga bog‘liq?", "options": ["Flavonoidli pigmentlarga", "Faqat kraxmalga", "Nuklein kislotalarga", "Mineral tuzlarga"], "answer": 0, "level": "Oson"}, {"section": 1, "q": "Oddiy fenolli birikmalar ko‘proq qaysi to‘qimalarda uchraydi?", "options": ["Biokimyoviy jarayonlar faol kechadigan barg, gul va o‘sish nuqtalarida", "Faqat yog‘ochlangan o‘lik to‘qimalarda", "Faqat ildiz qopqog‘ida", "Faqat urug‘ po‘stida"], "answer": 0, "level": "O‘rta"}, {"section": 1, "q": "Fenolli birikmalar aromatik halqalar soniga ko‘ra nechta asosiy guruhga bo‘linadi?", "options": ["Ikki", "Uch", "To‘rt", "Besh"], "answer": 1, "level": "Oson"}, {"section": 1, "q": "Quyidagilardan qaysi biri eng oddiy monofenol hisoblanadi?", "options": ["Fenol", "Pirogallol", "Florglyutsin", "Gidroxinon"], "answer": 0, "level": "Oson"}, {"section": 1, "q": "Katexolning strukturaviy tavsifi qaysi javobda to‘g‘ri berilgan?", "options": ["Orto-digidroksifenol", "Meta-digidroksifenol", "Uch gidroksil guruhli fenol", "Metoksi guruhli fenol"], "answer": 0, "level": "O‘rta"}, {"section": 1, "q": "Rezorsin qaysi turdagi fenol hisoblanadi?", "options": ["Orto-digidroksifenol", "Meta-digidroksifenol", "Uch gidroksil guruhli fenol", "Monogidroksifenol"], "answer": 1, "level": "O‘rta"}, {"section": 1, "q": "Qaysi birikma kuchli qaytaruvchi xususiyatga ega deb ko‘rsatilgan?", "options": ["Vanilin", "Pirogallol", "Salitsil kislota", "Kumarin"], "answer": 1, "level": "O‘rta"}, {"section": 1, "q": "Gvayakolning boshqa oddiy fenollardan farqlovchi guruhi qaysi?", "options": ["Metoksi guruhi", "Fosfat guruhi", "Amino guruhi", "Sulfat guruhi"], "answer": 0, "level": "O‘rta"}, {"section": 1, "q": "C₆—C₁ strukturali birikmalarda C₁ nimani anglatadi?", "options": ["Bitta uglerod atomidan iborat yon zanjirni", "Bitta kislorod atomini", "Bitta gidroksil guruhini", "Bitta benzol halqasini"], "answer": 0, "level": "O‘rta"}, {"section": 1, "q": "Quyidagilardan qaysi biri C₆—C₁ strukturali fenolli birikmaga kiradi?", "options": ["Gallat kislota", "Dolchin kislota", "Kumarin", "Skopoletin"], "answer": 0, "level": "Murakkab"}, {"section": 2, "q": "C₆—C₃ strukturali birikmalar asosan qaysi guruhlarga bo‘linadi?", "options": ["Dolchin kislota hosilalari va kumarinlarga", "Monosaxaridlar va polisaxaridlarga", "Oqsillar va peptidlarga", "Steroidlar va fosfolipidlarga"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "Ferul kislota qaysi jarayonda ishtirok etadi?", "options": ["Lignin biosintezida", "DNK replikatsiyasida", "Glikolizning birinchi bosqichida", "Oqsil denaturatsiyasida"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "Kumarin qanday birikma hisoblanadi?", "options": ["Dolchin kislota laktoni", "Fenolning glikozidi", "Aminokislotaning amidi", "Yuqori molekulali polisaxarid"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "Xlorogen kislota qaysi ikki kislotadan hosil bo‘ladi?", "options": ["Kofe kislotasi va xin kislotasidan", "Salitsil va gallat kislotalaridan", "Dolchin va ferul kislotalaridan", "Sirka va limon kislotalaridan"], "answer": 0, "level": "Murakkab"}, {"section": 2, "q": "Kumarin ayniqsa qaysi o‘simlik tarkibida ko‘p uchraydi?", "options": ["Qashqarbeda (Melilotus officinalis)", "G‘o‘za", "Bug‘doy", "Kartoshka"], "answer": 0, "level": "Oson"}, {"section": 2, "q": "Kumaringa xos hid qaysi javobda to‘g‘ri berilgan?", "options": ["Pichan yoki quruq poxol hidi", "Achchiq bodom hidi", "Oltingugurt hidi", "Sirka hidi"], "answer": 0, "level": "Oson"}, {"section": 2, "q": "Fenilpropanoid yo‘lida PAL fermenti qanday vazifani bajaradi?", "options": ["Fenilalaninni dolchin kislotaga aylantiradi", "Dolchin kislotani p-kumar kislotaga aylantiradi", "Kumarinni glikozidga aylantiradi", "Ferul kislotani parchalaydi"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "C4H fermentining asosiy vazifasi qaysi?", "options": ["Gidroksillanish reaksiyasini katalizlaydi", "Metillanish reaksiyasini katalizlaydi", "Laktonni gidrolizlaydi", "Aminoguruhni ko‘chiradi"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "OMT fermenti qaysi reaksiyada ishtirok etadi?", "options": ["Metillanish", "Dekarboksillanish", "Fosforillanish", "Dezaminlanish"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "Kumarinlar uchun sifat reaksiyasida spirtli ajratmaga ishqor qo‘shilganda qanday rang kuzatiladi?", "options": ["Sariq yoki och sariq", "To‘q ko‘k", "Qora", "Rangsiz qoladi"], "answer": 0, "level": "Oson"}, {"section": 2, "q": "Diazoreaksiya ijobiy bo‘lganda aralashma odatda qanday rangga bo‘yaladi?", "options": ["Qo‘ng‘ir-qizil yoki to‘q qizil", "Oq", "Och ko‘k", "Yashil"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "Lakton reaksiyasida ishqoriy ajratma HCl bilan neytrallanganda kumarin mavjud bo‘lsa nima kuzatiladi?", "options": ["Cho‘kma yoki loyqa hosil bo‘ladi", "Eritma mutlaqo tiniqlashadi", "Gaz ajraladi", "Ko‘k rang paydo bo‘ladi"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "Ishqor ta’sirida hosil bo‘lgan suvda eruvchan kumarinatlar kislotali muhitda nimaga aylanadi?", "options": ["Erkin kumarin (lakton) holatiga", "Aminokislotaga", "Polisaxaridga", "Fosfolipidga"], "answer": 0, "level": "Murakkab"}, {"section": 2, "q": "Kumarin glikozidlari suyultirilgan sulfat kislota ta’sirida gidrolizlanganda nima ajralib chiqadi?", "options": ["Aglikon-kumarin", "Oqsil cho‘kmasi", "Mineral tuz", "Xlorofill"], "answer": 0, "level": "Murakkab"}, {"section": 2, "q": "Kumarinlarning aglikon shakli qaysi muhitda yaxshi eriydi?", "options": ["Spirt va organik erituvchilarda", "Faqat distillangan suvda", "Faqat kuchli ishqorda", "Faqat fiziologik eritmada"], "answer": 0, "level": "O‘rta"}, {"section": 2, "q": "Ko‘pchilik kumarin va furokumarinlar UV nurida qanday xususiyat namoyon qiladi?", "options": ["O‘ziga xos fluoressensiya bilan tovlanadi", "Faqat qora rangga kiradi", "Mutlaqo nurlanmaydi", "Gaz ajratadi"], "answer": 0, "level": "O‘rta"}];
+let current = 0;
+let answers = Array(questions.length).fill(null);
+let flagged = Array(questions.length).fill(false);
+let remaining = 30 * 60;
+let finished = false;
+let timerId = null;
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById("qNumber").textContent = `${current + 1}-savol`;
+  document.getElementById("qLevel").textContent = `Daraja: ${q.level}`;
+  document.getElementById("qText").textContent = q.q;
+
+  const box = document.getElementById("options");
+  box.innerHTML = "";
+  q.options.forEach((opt, i) => {
+    const label = document.createElement("label");
+    label.className = "option" + (answers[current] === i ? " selected" : "");
+    label.innerHTML = `<input type="radio" name="answer" ${answers[current] === i ? "checked" : ""}> <span>${opt}</span>`;
+    label.onclick = () => {
+      if (finished) return;
+      answers[current] = i;
+      renderQuestion();
+      renderNav();
+      updateProgress();
+    };
+    box.appendChild(label);
+  });
+
+  document.getElementById("prevBtn").disabled = current === 0;
+  document.getElementById("nextBtn").textContent = current === questions.length - 1 ? "Testni yakunlash" : "Keyingi →";
+  document.getElementById("flagBtn").textContent = flagged[current] ? "⚑ Belgilangan" : "⚑ Belgilash";
+
+  updateSectionUI(q.section);
+  renderNav();
+}
+
+function updateSectionUI(section) {
+  const s1 = section === 1;
+  document.getElementById("tab1").classList.toggle("active", s1);
+  document.getElementById("tab2").classList.toggle("active", !s1);
+  document.getElementById("leftKicker").textContent = `BO‘LIM ${section} / 2`;
+  document.getElementById("leftTitle").textContent = s1 ? "Fenolli birikmalar biokimyosi" : "Kumarinlar va sifat reaksiyalari";
+  document.getElementById("leftSub").textContent = s1 ? "1–15-savollar" : "16–30-savollar";
+  document.getElementById("topicTitle").textContent = `${section}-bo‘lim mavzulari`;
+  document.getElementById("topicText").textContent = s1
+    ? "Fenolli birikmalarning tuzilishi va biologik ahamiyati; monofenollar; polifenollar; fenol hosilalari; C₆ va C₆—C₁ strukturali birikmalar."
+    : "C₆—C₃ strukturali birikmalar; fenilpropanoid yo‘li; kumarinlar biosintezi; diazoreaksiya; lakton reaksiyasi; eruvchanlik va fluoressensiya.";
+}
+
+function renderNav() {
+  const nav = document.getElementById("qnav");
+  nav.innerHTML = "";
+  questions.forEach((q, i) => {
+    const b = document.createElement("button");
+    b.className = "qnum";
+    if (i === current) b.classList.add("current");
+    if (answers[i] !== null) b.classList.add("answered");
+    if (flagged[i]) b.classList.add("flagged");
+    b.textContent = i + 1;
+    b.onclick = () => { if (!finished) { current = i; renderQuestion(); } };
+    nav.appendChild(b);
+  });
+}
+
+function updateProgress() {
+  const answered = answers.filter(v => v !== null).length;
+  const pct = answered / questions.length * 100;
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressText").textContent = `${answered} / ${questions.length} savolga javob berildi`;
+}
+
+function nextQuestion() {
+  if (current === questions.length - 1) finishTest();
+  else { current++; renderQuestion(); }
+}
+function prevQuestion() {
+  if (current > 0) { current--; renderQuestion(); }
+}
+function goSection(s) {
+  if (finished) return;
+  current = s === 1 ? 0 : 15;
+  renderQuestion();
+}
+function toggleFlag() {
+  if (finished) return;
+  flagged[current] = !flagged[current];
+  renderQuestion();
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2,"0");
+  const s = (sec % 60).toString().padStart(2,"0");
+  return `${m}:${s}`;
+}
+function tick() {
+  if (!finished) {
+    remaining--;
+    document.getElementById("timer").textContent = formatTime(remaining);
+    if (remaining <= 0) finishTest(true);
+  }
+}
+function startTimer() {
+  clearInterval(timerId);
+  timerId = setInterval(tick, 1000);
+}
+
+
+function finishTest(auto=false) {
+  if (finished) return;
+  const unanswered = answers.filter(v => v === null).length;
+  if (!auto && unanswered > 0) {
+    const ok = confirm(`${unanswered} ta savol javobsiz qolgan. Testni yakunlaysizmi?`);
+    if (!ok) return;
+  }
+  finished = true;
+  clearInterval(timerId);
+  let correct = 0;
+  answers.forEach((a,i) => { if (a === questions[i].answer) correct++; });
+  const wrong = answers.filter((a,i) => a !== null && a !== questions[i].answer).length;
+  const blank = answers.filter(a => a === null).length;
+  const percent = Math.round(correct / questions.length * 100);
+
+  document.getElementById("quizArea").classList.add("hidden");
+  document.getElementById("resultArea").classList.remove("hidden");
+  document.getElementById("scoreText").textContent = `${correct}/${questions.length}`;
+  document.getElementById("percentText").textContent = `${percent}%`;
+  document.getElementById("correctText").textContent = correct;
+  document.getElementById("wrongText").textContent = wrong;
+  document.getElementById("blankText").textContent = blank;
+  document.getElementById("flagBtn").classList.add("hidden");
+
+  let msg = "";
+  if (percent >= 86) msg = "A’lo natija! Mavzuni juda yaxshi o‘zlashtirgansiz.";
+  else if (percent >= 71) msg = "Yaxshi natija. Ayrim mavzularni yana bir bor takrorlang.";
+  else if (percent >= 55) msg = "Qoniqarli natija. Nazariy materialni mustahkamlash tavsiya etiladi.";
+  else msg = "Mavzuni qayta o‘rganib, testni yana bir bor ishlang.";
+  if (auto) msg = "Vaqt tugadi. " + msg;
+  document.getElementById("resultMessage").textContent = msg;
+}
+
+function restartTest() {
+  if (!confirm("Testni boshidan boshlaysizmi? Barcha javoblar o‘chiriladi.")) return;
+  current = 0;
+  answers = Array(questions.length).fill(null);
+  flagged = Array(questions.length).fill(false);
+  remaining = 30 * 60;
+  finished = false;
+  document.getElementById("timer").textContent = "30:00";
+  document.getElementById("quizArea").classList.remove("hidden");
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("flagBtn").classList.remove("hidden");
+  renderQuestion();
+  updateProgress();
+  startTimer();
+}
+
+renderQuestion();
+updateProgress();
+startTimer();
+</script>
+</body>
+</html>
