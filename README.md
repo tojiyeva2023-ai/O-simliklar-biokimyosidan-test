@@ -1,2 +1,2 @@
 # O-simliklar-biokimyosidan-test
-O‘simliklar biokimyosi fanidan interaktiv test
+O‘simliklar biokimyosi fanidan interaktiv test 
